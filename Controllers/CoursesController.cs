@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
+using ContosoUniversity.DTOs;
+using AutoMapper;
+
 
 namespace ContosoUniversity.Controllers
 {
     public class CoursesController : Controller
     {
         private readonly SchoolContext _context;
+        private readonly IMapper mapper;
 
-        public CoursesController(SchoolContext context)
+        public CoursesController(SchoolContext context, IMapper mapper)
         {
             _context = context;
+            this.mapper = mapper;
         }
 
         // GET: Courses
@@ -54,15 +59,16 @@ namespace ContosoUniversity.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CourseID,Title,Credits")] Course course)
+        public async Task<IActionResult> Create([Bind("CourseID,Title,Credits")] CourseDTOs courseDTOs)
         {
             if (ModelState.IsValid)
             {
+                var course = mapper.Map<Course>(courseDTOs);
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(course);
+            return View(courseDTOs);
         }
 
         // GET: Courses/Edit/5

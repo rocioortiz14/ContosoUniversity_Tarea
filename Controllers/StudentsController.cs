@@ -7,22 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
+using ContosoUniversity.DTOs;
+using AutoMapper;
 
 namespace ContosoUniversity.Controllers
 {
     public class StudentsController : Controller
     {
         private readonly SchoolContext _context;
+        private readonly IMapper mapper;
 
-        public StudentsController(SchoolContext context)
+        public StudentsController(SchoolContext context, IMapper mapper)
         {
             _context = context;
+            this.mapper = mapper;
         }
 
         // GET: Students
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Students.ToListAsync());
+           return View(await _context.Students.ToListAsync());
         }
 
         // GET: Students/Details/5
@@ -54,15 +58,16 @@ namespace ContosoUniversity.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,LastName,FirstMidName,EnrollmentDate")] Student student)
+        public async Task<IActionResult> Create([Bind("ID,LastName,FirstMidName,EnrollmentDate")] StudentsDTOs studentsDTOs)
         {
             if (ModelState.IsValid)
             {
+                var student = mapper.Map<Student>(studentsDTOs);
                 _context.Add(student);
-                await _context.SaveChangesAsync();
+               await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(student);
+            return View(studentsDTOs);
         }
 
         // GET: Students/Edit/5
